@@ -4,6 +4,11 @@ import sys
 import time
 import random
 import pandas as pd
+pd.options.mode.chained_assignment = None
+pd.set_option('display.max_rows', 1000)
+pd.set_option('display.max_columns', 1000)
+pd.set_option('display.width', 1000)
+# my sql connction
 
 
 mydb = sqlite3.connect("database.db")
@@ -35,8 +40,7 @@ def initial():
                 EMAIL = EMAIL.strip()
                 if EMAIL != "":
                     while True:
-                        PASSWORD="logon@123"
-                        #PASSWORD = input("ENTER MASTER PASSWORD: ")
+                        PASSWORD = input("ENTER MASTER PASSWORD: ")
                         PASSWORD.strip()
                         if PASSWORD != "":
                             pass
@@ -82,8 +86,8 @@ def master():
                 decrypted = DECRYPT(j, key)
                 decrypt.append(decrypted)
                 count += 1
-
-    MasterPass = input("ENTER MASTER PASSWORD FOR {}: ".format(decrypt[0]))
+    MasterPass="logon@123"
+    #MasterPass = input("ENTER MASTER PASSWORD FOR {}: ".format(decrypt[0]))
 
     if MasterPass == decrypt[1]:
         print("\n", "="*8,
@@ -201,8 +205,32 @@ def NEW_RECORD():
 def VIEW_RECORDS():
     query="SELECT PASSWORDS.AppName,PASSWORDS.Email_id,PASSWORDS.Username,PASSWORDS.Password,PASSWORDS.URL,KeyDetails.Key FROM PASSWORDS,KeyDetails where KeyDetails.AccountNumber=PASSWORDS.AccountNumber"
     mycursor.execute(query)
-    df=pd.DataFrame(mycursor.fetchall())
-    print(df)
+    temp=[]
+    response=[]
+    for i in mycursor.fetchall():
+        for j in i:
+            temp.append(j)
+        response.append(temp)
+        temp=[]
+    list=[["APP NAME","EMAIL ID","USERNAME","PASSWORD","URL"]]
+    for i in range(len(response)):
+        for j in range(len(response[i])):
+            if j!=5:
+                key=bytes(response[i][5],encoding="utf8")
+                dec=DECRYPT(response[i][j],key)
+                temp.append(dec)
+        list.append(temp)
+        temp=[]
+    if len(list)!=1:
+        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(len(list[1:]))])
+        print(df)
+        time.sleep(2)
+        main_menu
+    else:
+        print("NO SAVED PASSWORDS")
+        time.sleep(2)
+        main_menu()
+
 
 
 def SEARCH_RECORDS():
