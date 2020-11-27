@@ -3,6 +3,7 @@ from cryptography.fernet import Fernet
 import sys
 import time
 import random
+import pandas as pd
 
 
 mydb = sqlite3.connect("database.db")
@@ -34,7 +35,8 @@ def initial():
                 EMAIL = EMAIL.strip()
                 if EMAIL != "":
                     while True:
-                        PASSWORD = input("ENTER MASTER PASSWORD: ")
+                        PASSWORD="logon@123"
+                        #PASSWORD = input("ENTER MASTER PASSWORD: ")
                         PASSWORD.strip()
                         if PASSWORD != "":
                             pass
@@ -103,7 +105,7 @@ def main_menu():
     print("OPTION 5: EXIT")
     list = [1, 2, 3, 4, 5]
     while True:
-        opt = input("ENTER OPTION NUMBER: ")
+        opt = input("\nENTER OPTION NUMBER: ")
         try:
             opt = int(opt.strip())
             if opt in list:
@@ -125,6 +127,7 @@ def main_menu():
 
 
 def NEW_RECORD():
+    print("\n")
     while True:
         APPNAME = input("ENTER APPLICATION/WEBSITE NAME: ")
         if APPNAME.strip() != "":
@@ -182,25 +185,24 @@ def NEW_RECORD():
     for i in creds:
         ENCRYPTED=ENCRYPT(str(i),key)
         encrypt.append(ENCRYPTED)
-    query="insert into PASSWORDS values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
-    mycursor.execute(query)
-    query="insert into KeyDetails values({},'{}')".format(ACCOUNTNUMBER,str(key,"utf8"))
-    mycursor.execute(query)
-    mydb.commit()
-    """try:
-        query="insert into PASSWORDS  values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
+    
+    try:
+        query="insert into PASSWORDS values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
         mycursor.execute(query)
-        query="insert into PASSWORDS values({},'{}')".format(ACCOUNTNUMBER,key)
+        query="insert into KeyDetails values({},'{}')".format(ACCOUNTNUMBER,str(key,"utf8"))
         mycursor.execute(query)
         mydb.commit()
     except Exception:
-        print("UNKNOWN ERROR, TRY AGAIN LA")"""
+        print("UNKNOWN ERROR, TRY AGAIN LATER")
 
     pass
 
 
 def VIEW_RECORDS():
-    pass
+    query="SELECT PASSWORDS.AppName,PASSWORDS.Email_id,PASSWORDS.Username,PASSWORDS.Password,PASSWORDS.URL,KeyDetails.Key FROM PASSWORDS,KeyDetails where KeyDetails.AccountNumber=PASSWORDS.AccountNumber"
+    mycursor.execute(query)
+    df=pd.DataFrame(mycursor.fetchall())
+    print(df)
 
 
 def SEARCH_RECORDS():
