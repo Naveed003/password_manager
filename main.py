@@ -182,8 +182,20 @@ def NEW_RECORD():
     for i in creds:
         ENCRYPTED=ENCRYPT(str(i),key)
         encrypt.append(ENCRYPTED)
-    query="insert into PASSWORDS  values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
-    mycursor.execute
+    query="insert into PASSWORDS values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
+    mycursor.execute(query)
+    query="insert into KeyDetails values({},'{}')".format(ACCOUNTNUMBER,str(key,"utf8"))
+    mycursor.execute(query)
+    mydb.commit()
+    """try:
+        query="insert into PASSWORDS  values({},'{}','{}','{}','{}','{}')".format(ACCOUNTNUMBER,encrypt[1],encrypt[2],encrypt[3],encrypt[4],encrypt[5])
+        mycursor.execute(query)
+        query="insert into PASSWORDS values({},'{}')".format(ACCOUNTNUMBER,key)
+        mycursor.execute(query)
+        mydb.commit()
+    except Exception:
+        print("UNKNOWN ERROR, TRY AGAIN LA")"""
+
     pass
 
 
