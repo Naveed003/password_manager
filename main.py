@@ -352,8 +352,10 @@ def DELETE_RECORD():
         mycursor.execute(query)
         mydb.commit()
         df=df.drop([opt],axis=0)
-        print("\n", "="*4, "RECORD DELETED SUCCESSFULLY", "="*4, "\n")        
-        time.sleep(2)
+        
+        print("\n", "="*4, "RECORD DELETED SUCCESSFULLY", "="*4, "\n")   
+        print(df)     
+        time.sleep(4)
         main_menu()
     else:
         print("\n", "="*4, "NO SAVED PASSWORDS", "="*4, "\n")
