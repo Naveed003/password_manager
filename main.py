@@ -24,6 +24,7 @@ def ENCRYPT(string, key):
 def DECRYPT(string, key):
     crypter = Fernet(key)
     decrypted = crypter.decrypt(bytes(string, encoding="utf8"))
+    
     return str(decrypted, "utf8")
 
 
@@ -222,12 +223,12 @@ def VIEW_RECORDS():
         list.append(temp)
         temp=[]
     if len(list)!=1:
-        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(len(list[1:]))])
+        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(1,len(list[1:])+1)])
         print(df)
         time.sleep(2)
         main_menu()
     else:
-        print("NO SAVED PASSWORDS")
+        print("\n", "="*4, "NO SAVED PASSWORDS", "="*4, "\n")
         time.sleep(2)
         main_menu()
 
@@ -285,7 +286,7 @@ def SEARCH_RECORDS():
         list.append(temp)
         temp=[]
     if len(list)!=1:
-        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(len(list[1:]))])
+        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(1,len(list[1:])+1)])
         search_result=df[col].isin([to_search])
         search_result=df[search_result]
         if search_result.empty:
@@ -296,13 +297,68 @@ def SEARCH_RECORDS():
         time.sleep(2)
         main_menu()
     else:
-        print("NO SAVED PASSWORDS")
+        print("\n", "="*4, "NO SAVED PASSWORDS", "="*4, "\n")
         time.sleep(2)
         main_menu()
 
 
 def DELETE_RECORD():
-    pass
+    query="SELECT PASSWORDS.AccountNumber,PASSWORDS.AppName,PASSWORDS.Email_id,PASSWORDS.Username,PASSWORDS.Password,PASSWORDS.URL,KeyDetails.Key FROM PASSWORDS,KeyDetails where KeyDetails.AccountNumber=PASSWORDS.AccountNumber"
+    mycursor.execute(query)
+    temp=[]
+    response=[]
+    for i in mycursor.fetchall():
+        for j in i:
+            temp.append(j)
+        response.append(temp)
+        temp=[]
+    list=[["ACCOUNT NUMBER","APP NAME","EMAIL ID","USERNAME","PASSWORD","URL"]]
+    for i in range(len(response)):
+        for j in range(len(response[i])):
+            if j!=6:
+                if j==0:
+                    dec=response[i][j]
+                else:
+                    key=bytes(response[i][6],encoding="utf8")
+                    dec=DECRYPT(response[i][j],key)
+                temp.append(dec)
+        list.append(temp)
+        temp=[]
+    if len(list)!=1:
+        indexx=[i for i in range(1,len(list[1:])+1)]
+        df=pd.DataFrame(list[1:],columns=list[0],index=indexx)
+        df1=df
+        df=df.drop(["ACCOUNT NUMBER"],axis=1)
+        print(df)
+        print("\n")
+        while True:
+            opt=input("ENTER INDEX NUMBER TO DELETE: ")
+            opt=opt.strip()
+            try:
+                opt=int(opt)
+                if opt in indexx:
+                    break
+                else:
+                    print("\n", "="*4, "ENTER A VALID INDEX", "="*4, "\n")
+                    continue
+            except Exception:
+                print("\n", "="*4, "ENTER A VALID INDEX", "="*4, "\n")
+                continue
+    
+        AccountNumber=df1.iloc[opt-1,0]
+        query="delete from PASSWORDS where AccountNumber={}".format(AccountNumber)
+        mycursor.execute(query)
+        query="delete from KeyDetails where AccountNumber={}".format(AccountNumber)
+        mycursor.execute(query)
+        mydb.commit()
+        df=df.drop([opt],axis=0)
+        print("\n", "="*4, "RECORD DELETED SUCCESSFULLY", "="*4, "\n")        
+        time.sleep(2)
+        main_menu()
+    else:
+        print("\n", "="*4, "NO SAVED PASSWORDS", "="*4, "\n")
+        time.sleep(2)
+        main_menu()
 
  
 if __name__ == "__main__":
