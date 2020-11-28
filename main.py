@@ -225,7 +225,7 @@ def VIEW_RECORDS():
         df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(len(list[1:]))])
         print(df)
         time.sleep(2)
-        main_menu
+        main_menu()
     else:
         print("NO SAVED PASSWORDS")
         time.sleep(2)
@@ -234,13 +234,77 @@ def VIEW_RECORDS():
 
 
 def SEARCH_RECORDS():
-    pass
+    print("\n")
+    print("OPTION 1: SEARCH BY APP NAME")
+    print("OPTION 2: SEARCH BY EMAIL ID")
+    print("OPTION 3: SEARCH BY USERNAME")
+    print("OPTION 4: SEARCH BY URL")
+    print("OPTION 5: EXIT")
+    print("\n")
+    while True:
+        opt=input("ENTER OPTION NUMBER: ")
+        if opt in [str(i) for i in range(1,6)]:
+            opt=int(opt)
+            if opt==1:
+                to_search=input("ENTER APP NAME TO SEARCH: ")
+                col="APP NAME"
+            elif opt==2:
+                to_search=input("ENTER EMAIL ID TO SEARCH: ")
+                col="EMAIL ID"
+            elif opt==3:
+                to_search=input("ENTER USERNAME TO SEARCH: ")
+                col="USERNAME"
+            elif opt==4:
+                to_search=input("ENTER URL TO SEARCH: ")
+                col="URL"
+            elif opt==5:
+                main_menu()
+            to_search=to_search.lower()
+            break
+        else:
+            print("\n", "="*4, "ENTER A VALID OPTION", "="*4, "\n")
+            continue
+
+    query="SELECT PASSWORDS.AppName,PASSWORDS.Email_id,PASSWORDS.Username,PASSWORDS.Password,PASSWORDS.URL,KeyDetails.Key FROM PASSWORDS,KeyDetails where KeyDetails.AccountNumber=PASSWORDS.AccountNumber"
+    mycursor.execute(query)
+    temp=[]
+    response=[]
+    for i in mycursor.fetchall():
+        for j in i:
+            temp.append(j)
+        response.append(temp)
+        temp=[]
+    list=[["APP NAME","EMAIL ID","USERNAME","PASSWORD","URL"]]
+
+    for i in range(len(response)):
+        for j in range(len(response[i])):
+            if j!=5:
+                key=bytes(response[i][5],encoding="utf8")
+                dec=DECRYPT(response[i][j],key)
+                temp.append(dec.lower())
+        list.append(temp)
+        temp=[]
+    if len(list)!=1:
+        df=pd.DataFrame(list[1:],columns=list[0],index=[i for i in range(len(list[1:]))])
+        search_result=df[col].isin([to_search])
+        search_result=df[search_result]
+        if search_result.empty:
+            print("\n", "="*4, "SEARCH NOT FOUND", "="*4, "\n")
+        
+        else:
+            print(search_result)
+        time.sleep(2)
+        main_menu()
+    else:
+        print("NO SAVED PASSWORDS")
+        time.sleep(2)
+        main_menu()
 
 
 def DELETE_RECORD():
     pass
 
-
+ 
 if __name__ == "__main__":
     query = "select * from USERS"
     mycursor.execute(query)
